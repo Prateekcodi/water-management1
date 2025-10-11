@@ -79,47 +79,107 @@ export interface Prediction {
 export const api = {
   // Tank status
   getTankStatus: async (deviceId: string): Promise<TankStatus> => {
-    const response = await apiClient.get(`/devices/${deviceId}/status`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/devices/${deviceId}/status`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching tank status:', error);
+      throw error;
+    }
   },
 
   // Telemetry data
   getTelemetry: async (deviceId: string, hours: number = 24): Promise<TelemetryData[]> => {
-    const response = await apiClient.get(`/devices/${deviceId}/telemetry?hours=${hours}`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/devices/${deviceId}/telemetry?hours=${hours}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching telemetry data:', error);
+      return []; // Return empty array on error
+    }
   },
 
   // Alerts
   getAlerts: async (deviceId: string, resolved?: boolean): Promise<Alert[]> => {
-    const params = resolved !== undefined ? { resolved } : {};
-    const response = await apiClient.get(`/devices/${deviceId}/alerts`, { params });
-    return response.data;
+    try {
+      const params = resolved !== undefined ? { resolved } : {};
+      const response = await apiClient.get(`/devices/${deviceId}/alerts`, { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching alerts:', error);
+      return []; // Return empty array on error
+    }
   },
 
   resolveAlert: async (deviceId: string, alertId: number): Promise<void> => {
-    await apiClient.post(`/devices/${deviceId}/alerts/${alertId}/resolve`);
+    try {
+      await apiClient.post(`/devices/${deviceId}/alerts/${alertId}/resolve`);
+    } catch (error) {
+      console.error('Error resolving alert:', error);
+      throw error;
+    }
   },
 
   // Predictions
   getPredictions: async (deviceId: string, daysAhead: number = 7): Promise<{ predictions: Prediction[] }> => {
-    const response = await apiClient.get(`/devices/${deviceId}/predictions?days_ahead=${daysAhead}`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/devices/${deviceId}/predictions?days_ahead=${daysAhead}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+      return { predictions: [] }; // Return empty predictions on error
+    }
   },
 
   // AI Chat
   chatWithAI: async (message: string, context?: any): Promise<{ response: string; timestamp: string }> => {
-    const response = await apiClient.post('/chat', { message, context });
-    return response.data;
+    try {
+      const response = await apiClient.post('/chat', { message, context });
+      return response.data;
+    } catch (error) {
+      console.error('Error with AI chat:', error);
+      return {
+        response: "Sorry, I'm having trouble connecting to the AI service right now. Please try again later.",
+        timestamp: new Date().toISOString()
+      };
+    }
   },
 
   // Device control
   setPumpState: async (deviceId: string, state: boolean): Promise<void> => {
-    await apiClient.post(`/devices/${deviceId}/control`, { pump: state });
+    try {
+      await apiClient.post('/commands', {
+        action: 'PUMP_ON' if state else 'PUMP_OFF',
+        device_id: deviceId
+      });
+    } catch (error) {
+      console.error('Error controlling pump:', error);
+      throw error;
+    }
   },
 
   // Health check
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
-    const response = await apiClient.get('/health');
-    return response.data;
+    try {
+      const response = await apiClient.get('/health');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking health:', error);
+      return {
+        status: 'unhealthy',
+        timestamp: new Date().toISOString()
+      };
+    }
+  },
+
+  // List devices
+  listDevices: async (): Promise<{ devices: string[]; total_devices: number }> => {
+    try {
+      const response = await apiClient.get('/devices');
+      return response.data;
+    } catch (error) {
+      console.error('Error listing devices:', error);
+      return { devices: [], total_devices: 0 };
+    }
   },
 };

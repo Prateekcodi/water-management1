@@ -94,28 +94,12 @@ export const TankDashboard: React.FC = () => {
     { refetchInterval: 10000 }
   );
 
-  // Mock predictions data for demonstration
-  const mockPredictions = {
-    device_id: 'tank01',
-    predictions: [
-      { date: new Date().toISOString().split('T')[0], predicted_consumption: 45.2 },
-      { date: new Date(Date.now() + 86400000).toISOString().split('T')[0], predicted_consumption: 42.8 },
-      { date: new Date(Date.now() + 172800000).toISOString().split('T')[0], predicted_consumption: 48.1 },
-      { date: new Date(Date.now() + 259200000).toISOString().split('T')[0], predicted_consumption: 44.5 },
-      { date: new Date(Date.now() + 345600000).toISOString().split('T')[0], predicted_consumption: 46.9 },
-      { date: new Date(Date.now() + 432000000).toISOString().split('T')[0], predicted_consumption: 43.2 },
-      { date: new Date(Date.now() + 518400000).toISOString().split('T')[0], predicted_consumption: 47.6 }
-    ],
-    summary: {
-      predicted_days_left: 12.5,
-      confidence_level: 'medium',
-      next_refill_date: new Date(Date.now() + 12.5 * 24 * 60 * 60 * 1000).toISOString(),
-      daily_average_liters: 45.8
-    }
-  };
-
-  // Use mock data for now - replace with real API call when ESP32 sends data
-  const predictions = mockPredictions;
+  // Get predictions data from API
+  const { data: predictions, isLoading: predictionsLoading } = useQuery(
+    'tank-predictions',
+    () => api.getPredictions('tank01', 7),
+    { refetchInterval: 300000 } // Refetch every 5 minutes
+  );
 
   if (statusLoading || telemetryLoading) {
     return <LoadingSpinner />;
@@ -511,16 +495,27 @@ export const TankDashboard: React.FC = () => {
       </div>
 
       {/* Predictions */}
-      {predictions ? (
+      {predictionsLoading ? (
         <div className="glass-card p-8 bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 rounded-xl">
-          <h3 className="text-2xl font-bold mb-8 flex items-center" style={{color: "#111827"}}>
+          <h3 className="text-2xl font-bold mb-8 flex items-center text-gray-900 dark:text-white">
+            <TrendingUp className="h-7 w-7 text-orange-500 mr-3" />
+            7-Day Consumption Prediction
+          </h3>
+          <div className="text-center py-8">
+            <LoadingSpinner />
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading predictions...</p>
+          </div>
+        </div>
+      ) : predictions && predictions.predictions && predictions.predictions.length > 0 ? (
+        <div className="glass-card p-8 bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 rounded-xl">
+          <h3 className="text-2xl font-bold mb-8 flex items-center text-gray-900 dark:text-white">
             <TrendingUp className="h-7 w-7 text-orange-500 mr-3" />
             7-Day Consumption Prediction
           </h3>
           <div className="space-y-4">
-            {predictions.predictions?.map((prediction: any, index: number) => (
+            {predictions.predictions.map((prediction: any, index: number) => (
               <div key={index} className="flex justify-between items-center py-4 px-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/50 dark:hover:to-purple-900/50 transition-all duration-300 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-600">
-                <span className="font-semibold" style={{color: "#111827"}}>
+                <span className="font-semibold text-gray-900 dark:text-white">
                   {format(new Date(prediction.date), 'EEEE, MMM d')}
                 </span>
                 <span className="font-bold text-blue-700 dark:text-blue-400 text-xl">
@@ -532,16 +527,16 @@ export const TankDashboard: React.FC = () => {
         </div>
       ) : (
         <div className="glass-card p-8 bg-white/90 dark:bg-gray-800/90 border border-gray-200 dark:border-gray-700 rounded-xl">
-          <h3 className="text-2xl font-bold mb-8 flex items-center" style={{color: "#111827"}}>
+          <h3 className="text-2xl font-bold mb-8 flex items-center text-gray-900 dark:text-white">
             <TrendingUp className="h-7 w-7 text-orange-500 mr-3" />
             7-Day Consumption Prediction
           </h3>
           <div className="text-center py-8">
             <div className="text-6xl mb-4">📊</div>
-            <h4 className="text-lg font-semibold mb-2" style={{color: "#374151"}}>
+            <h4 className="text-lg font-semibold mb-2 text-gray-700 dark:text-gray-300">
               Predictions Coming Soon
             </h4>
-            <p className="max-w-md mx-auto" style={{color: "#4B5563"}}>
+            <p className="max-w-md mx-auto text-gray-600 dark:text-gray-400">
               Consumption predictions will be available once your ESP32 starts sending data and we collect sufficient usage patterns.
               This typically takes 24-48 hours of continuous monitoring.
             </p>
