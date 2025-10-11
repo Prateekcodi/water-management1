@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-const api = axios.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
@@ -11,7 +11,7 @@ const api = axios.create({
 });
 
 // Add request interceptor for authentication
-api.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
     if (token) {
@@ -25,7 +25,7 @@ api.interceptors.request.use(
 );
 
 // Add response interceptor for error handling
-api.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -79,43 +79,47 @@ export interface Prediction {
 export const api = {
   // Tank status
   getTankStatus: async (deviceId: string): Promise<TankStatus> => {
-    const response = await api.get(`/devices/${deviceId}/status`);
+    const response = await apiClient.get(`/devices/${deviceId}/status`);
     return response.data;
   },
 
   // Telemetry data
   getTelemetry: async (deviceId: string, hours: number = 24): Promise<TelemetryData[]> => {
-    const response = await api.get(`/devices/${deviceId}/telemetry?hours=${hours}`);
+    const response = await apiClient.get(`/devices/${deviceId}/telemetry?hours=${hours}`);
     return response.data;
   },
 
   // Alerts
   getAlerts: async (deviceId: string, resolved?: boolean): Promise<Alert[]> => {
     const params = resolved !== undefined ? { resolved } : {};
-    const response = await api.get(`/devices/${deviceId}/alerts`, { params });
+    const response = await apiClient.get(`/devices/${deviceId}/alerts`, { params });
     return response.data;
   },
 
   resolveAlert: async (deviceId: string, alertId: number): Promise<void> => {
-    await api.post(`/devices/${deviceId}/alerts/${alertId}/resolve`);
+    await apiClient.post(`/devices/${deviceId}/alerts/${alertId}/resolve`);
   },
 
   // Predictions
   getPredictions: async (deviceId: string, daysAhead: number = 7): Promise<{ predictions: Prediction[] }> => {
-    const response = await api.get(`/devices/${deviceId}/predictions?days_ahead=${daysAhead}`);
+    const response = await apiClient.get(`/devices/${deviceId}/predictions?days_ahead=${daysAhead}`);
+    return response.data;
+  },
+
+  // AI Chat
+  chatWithAI: async (message: string, context?: any): Promise<{ response: string; timestamp: string }> => {
+    const response = await apiClient.post('/chat', { message, context });
     return response.data;
   },
 
   // Device control
   setPumpState: async (deviceId: string, state: boolean): Promise<void> => {
-    await api.post(`/devices/${deviceId}/control`, { pump: state });
+    await apiClient.post(`/devices/${deviceId}/control`, { pump: state });
   },
 
   // Health check
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
-    const response = await api.get('/health');
+    const response = await apiClient.get('/health');
     return response.data;
   },
 };
-
-export { api };

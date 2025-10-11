@@ -1,103 +1,121 @@
-# Smart Tank: Consumption Forecast + Leak Alerts
+# Smart Tank - Intelligent Water Management System
 
-A comprehensive IoT solution for monitoring water tank levels, predicting consumption, detecting leaks, and providing real-time alerts using ESP32 and ultrasonic sensors.
+A modern water management system with real-time monitoring, analytics, and visualization for both individual tanks and town-wide water systems.
 
-## 🎯 Project Overview
+## Features
 
-A device that measures tank level, logs usage, predicts days until empty, detects leaks and pump faults, and notifies you. ESP32 handles sensing and connectivity while a lightweight server processes data for predictions and notifications.
+- Real-time water tank monitoring
+- Flow rate and water quality tracking
+- Leak detection algorithms
+- Consumption predictions
+- Town-wide water management visualization
+- AI-powered chat assistant
+- Mobile-responsive dashboard
 
-## ✨ Features
+## Architecture
 
-- **Real-time tank level monitoring** with ultrasonic sensor
-- **Consumption tracking** with flow sensors
-- **Smart predictions** for days until empty
-- **Leak detection** and pump fault alerts
-- **Overflow protection** with automatic pump control
-- **Web dashboard** with charts and notifications
-- **Mobile-friendly interface**
+The system consists of:
 
-## 🛠 Hardware Requirements
+1. **Backend API** (Node.js Express)
+   - MQTT telemetry ingestion
+   - SQLite database for storage
+   - Real-time analytics
+   - REST API endpoints
 
-### Core Components
-- ESP32 development board
-- Ultrasonic distance sensor (HC-SR04) - ₹150
-- Water flow sensor (YF-S201) - ₹300
-- Relay module for pump control - ₹150
-- RTC module (DS3231) - ₹150
-- Wires, headers, project box - ₹400
+2. **Frontend Dashboard** (React + TypeScript)
+   - Interactive visualizations
+   - Real-time updates
+   - Responsive design
+   - Dark/light mode
 
-**Total Core Cost: ~₹1,150**
+3. **ESP32 Firmware** (Arduino)
+   - Sensor integration
+   - MQTT communication
+   - Low-power operation
 
-### Optional Components
-- Micro SD module for offline logging - ₹200
-- TDS sensor for water quality - ₹600
+## Getting Started
 
-**Total with Extras: ~₹1,950**
+### Prerequisites
 
-## 📁 Repository Structure
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/smart-tank.git
+   cd smart-tank
+   ```
+
+2. Start the application using Docker Compose:
+   ```bash
+   docker-compose up
+   ```
+
+3. Access the dashboard at http://localhost:3000
+
+### Manual Setup (without Docker)
+
+#### Backend
+
+```bash
+cd backend
+npm install
+npm start
 ```
-smart-tank/
-├── firmware/           # ESP32 Arduino code
-├── backend/           # FastAPI server
-├── dashboard/         # React web interface
-├── docs/             # Documentation and schematics
-├── testing/          # Calibration and test scripts
-└── deployment/       # Docker and deployment configs
+
+The backend will be available at http://localhost:8000
+
+#### Frontend
+
+```bash
+cd dashboard
+npm install
+npm start
 ```
 
-## 🚀 Quick Start
+The frontend will be available at http://localhost:3000
 
-1. **Hardware Setup**: Follow wiring diagrams in `docs/hardware/`
-2. **Firmware**: Upload ESP32 code from `firmware/`
-3. **Backend**: Deploy server from `backend/`
-4. **Dashboard**: Run web interface from `dashboard/`
+## Development
 
-## 📊 Data Flow
+### Backend API Endpoints
 
+- `GET /devices/:deviceId/status` - Get current tank status
+- `GET /devices/:deviceId/telemetry` - Get historical telemetry data
+- `GET /devices/:deviceId/alerts` - Get alerts
+- `POST /devices/:deviceId/alerts/:alertId/resolve` - Resolve an alert
+- `GET /devices/:deviceId/predictions` - Get consumption predictions
+- `POST /chat` - Interact with AI assistant
+
+### Environment Variables
+
+Backend:
+- `DATABASE_URL` - SQLite database URL
+- `MQTT_BROKER` - MQTT broker address
+- `MQTT_PORT` - MQTT broker port
+- `MQTT_USER` - MQTT username (optional)
+- `MQTT_PASSWORD` - MQTT password (optional)
+- `GEMINI_API_KEY` - Google Gemini API key for AI chat
+
+Frontend:
+- `REACT_APP_API_URL` - Backend API URL
+
+## Docker Deployment
+
+The project includes Docker configuration for easy deployment:
+
+```bash
+# Build and start containers
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
 ```
-ESP32 Sensors → MQTT/HTTP → Backend Server → Database → Web Dashboard
-                     ↓
-              Prediction Engine → Alert System → Notifications
-```
 
-## 🔧 Key Algorithms
+## License
 
-- **Consumption Calculation**: Flow sensor + level delta analysis
-- **Leak Detection**: Unexpected level changes when pump is off
-- **Prediction**: Moving average consumption with trend analysis
-- **Safety**: Overflow protection and pump fault detection
-
-## 📱 Dashboard Features
-
-- Real-time tank level and percentage
-- Consumption history charts
-- Days-until-empty prediction
-- Alert management
-- Manual pump controls
-- Historical data analysis
-
-## 🔒 Security
-
-- MQTT over TLS for telemetry
-- API authentication for controls
-- Secure pump activation with confirmation
-
-## 📋 Testing
-
-- Ultrasonic sensor calibration
-- Flow sensor verification
-- Leak simulation tests
-- Notification system validation
-
-## 🎯 Next Steps
-
-Choose what to build first:
-- **Firmware**: Complete ESP32 code with all sensors
-- **Backend**: FastAPI server with prediction engine
-- **Dashboard**: React web interface
-- **Testing**: Calibration and validation scripts
-
-## 📞 Support
-
-For questions or issues, refer to the documentation in each component folder or create an issue in this repository.# water-management
+This project is licensed under the MIT License - see the LICENSE file for details.

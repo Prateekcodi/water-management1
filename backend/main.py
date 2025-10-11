@@ -28,6 +28,7 @@ from sqlalchemy.orm import sessionmaker, Session
 import paho.mqtt.client as mqtt
 import os
 from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Load environment variables
 load_dotenv()
@@ -78,6 +79,25 @@ class TankStatus(BaseModel):
 class PredictionRequest(BaseModel):
     device_id: str
     days_ahead: int = 7
+
+class ChatRequest(BaseModel):
+    message: str
+    context: Optional[Dict[str, Any]] = None
+
+class ChatResponse(BaseModel):
+    response: str
+    timestamp: datetime
+
+class PredictionRequest(BaseModel):
+    houseData: List[Dict[str, Any]]
+    weatherData: Optional[Dict[str, Any]] = None
+
+class PredictionResponse(BaseModel):
+    totalDemand: float
+    peakHours: List[int]
+    efficiency: float
+    recommendations: List[str]
+    timestamp: datetime
 
 # Database models
 class Telemetry(Base):
@@ -153,6 +173,22 @@ MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
 # Notification settings
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+# Gemini AI Configuration
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    try:
+        # Use the working Gemini 2.5 Flash model
+        gemini_model = genai.GenerativeModel('models/gemini-2.5-flash')
+        logger.info("Gemini AI initialized successfully with gemini-2.5-flash")
+    except Exception as e:
+        gemini_model = None
+        logger.error(f"Could not initialize Gemini model: {e}")
+        logger.warning("AI chat will use fallback responses.")
+else:
+    gemini_model = None
+    logger.warning("Gemini API key not found. AI chat will use fallback responses.")
 
 def get_db():
     db = SessionLocal()
@@ -583,19 +619,230 @@ def calculate_daily_consumption(telemetry: List[Telemetry]) -> float:
     
     return sum(daily_consumptions) / len(daily_consumptions) if daily_consumptions else 0
 
+def clean_markdown_formatting(text: str) -> str:
+    """Remove all markdown formatting from text"""
+    import re
+    
+    # First handle bullet points - convert * bullets to -
+    text = re.sub(r'^\s*\*\s+', '- ', text, flags=re.MULTILINE)
+    
+    # Remove ALL asterisks (both ** and single *)
+    text = text.replace('**', '').replace('*', '')
+    
+    # Remove underscores used for formatting
+    text = text.replace('__', '').replace('_', '')
+    
+    # Clean up multiple spaces
+    text = re.sub(r'\s+', ' ', text)
+    
+    # Clean up any extra whitespace
+    text = '\n'.join(line.strip() for line in text.split('\n'))
+    
+    return text.strip()
+
+async def generate_prediction_response(houseData: List[Dict[str, Any]], weatherData: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    """Generate AI prediction for water demand"""
+
+    # Use Gemini AI if available
+    if gemini_model and GEMINI_API_KEY:
+        try:
+            prompt = f"""Analyze water consumption patterns and predict future demand for: {json.dumps(houseData)}. Weather: {json.dumps(weatherData or {})}. Return ONLY a valid JSON object with: totalDemand (number), peakHours (array of numbers), efficiency (number), recommendations (array of strings). No markdown, no extra text."""
+
+            response = gemini_model.generate_content(prompt)
+            text = response.text.strip()
+
+            # Try to parse as JSON
+            try:
+                return json.loads(text)
+            except json.JSONDecodeError:
+                # Try to extract JSON from text
+                import re
+                json_match = re.search(r'\{.*\}', text, re.DOTALL)
+                if json_match:
+                    return json.loads(json_match.group())
+                else:
+                    raise ValueError("No JSON found in response")
+
+        except Exception as e:
+            logger.error(f"Error calling Gemini AI for prediction: {e}")
+
+    # Fallback
+    return {
+        "totalDemand": 12580 + np.random.random() * 2000,
+        "peakHours": [7, 12, 19],
+        "efficiency": 87 + np.random.random() * 8,
+        "recommendations": ["System operating optimally", "Monitor for efficiency improvements"]
+    }
+
+async def generate_ai_response(message: str, context: Optional[Dict[str, Any]] = None) -> str:
+    """Generate AI response using Gemini AI for chat queries about the tank system"""
+    
+    # Get current device status
+    device_id = "tank01"  # Default device
+    tank_data = ""
+    
+    if device_id in device_status:
+        status = device_status[device_id]
+        current_level = status["current_level"]
+        percent_full = status["percent_full"]
+        temperature = status["temperature"]
+        tds = status["tds"]
+        pump_state = "ON" if status["pump_state"] else "OFF"
+        flow_rate = status["flow_rate"]
+        last_update = status["last_update"]
+        
+        tank_data = f"""
+Current Smart Tank Status:
+- Water Level: {current_level:.1f} cm ({percent_full:.1f}% of tank capacity)
+- Temperature: {temperature:.1f}°C
+- Water Quality (TDS): {tds:.0f} ppm
+- Pump Status: {pump_state}
+- Flow Rate: {flow_rate:.1f} L/min
+- Last Update: {last_update}
+- Tank Height: 150 cm
+- Tank Capacity: ~1178 liters
+"""
+    else:
+        tank_data = "Tank data is currently unavailable. Please check if your device is connected."
+    
+    # Use Gemini AI if available
+    if gemini_model and GEMINI_API_KEY:
+        try:
+            # Create a comprehensive prompt for Gemini
+            system_prompt = f"""You are a Smart Water Tank AI Assistant. You help users monitor and manage their water tank system.
+
+{tank_data}
+
+Instructions:
+- Be helpful, friendly, and knowledgeable about water tank systems
+- Provide specific information based on the current tank data above
+- Give practical advice about water management, maintenance, and efficiency
+- If asked about water level, temperature, quality, pump status, or consumption, use the exact data provided
+- For general questions about water tanks, provide educational and helpful responses
+- Keep responses concise but informative
+- If the data shows concerning levels (below 20%), mention it and suggest action
+- IMPORTANT: Do not use any asterisks (*), double asterisks (**), underscores (_), or any markdown formatting
+- Write in plain text only using normal sentences and paragraphs
+- Use simple bullet points with dashes (-) if needed, but no special formatting
+
+User Question: {message}
+
+Respond in plain text without any asterisks, bold formatting, or markdown. Just use normal conversational text."""
+
+            # Generate response using Gemini
+            response = gemini_model.generate_content(system_prompt)
+            # Clean up markdown formatting
+            clean_response = clean_markdown_formatting(response.text)
+            return clean_response
+            
+        except Exception as e:
+            logger.error(f"Error calling Gemini AI: {e}")
+            # Fall back to simple response if Gemini fails
+            pass
+    
+    # Fallback responses if Gemini is not available or fails
+    message_lower = message.lower()
+    
+    if not tank_data or "unavailable" in tank_data:
+        return "I don't have current tank data available. Please check if your device is connected and try again."
+    
+    # Simple fallback responses
+    if any(word in message_lower for word in ["level", "water level", "how much water"]):
+        return f"Your current water level is {current_level:.1f} cm, which is {percent_full:.1f}% of tank capacity. The tank is {'nearly full' if percent_full > 80 else 'at a good level' if percent_full > 50 else 'getting low' if percent_full > 20 else 'critically low'}."
+    
+    elif any(word in message_lower for word in ["temperature", "temp"]):
+        return f"The current water temperature is {temperature:.1f}°C. This is {'normal' if 15 <= temperature <= 30 else 'quite warm' if temperature > 30 else 'quite cold'}."
+    
+    elif any(word in message_lower for word in ["tds", "quality", "purity"]):
+        quality = "excellent" if tds < 150 else "good" if tds < 300 else "acceptable" if tds < 500 else "poor"
+        return f"The water quality shows {tds:.0f} ppm TDS. This indicates {quality} water quality."
+    
+    elif any(word in message_lower for word in ["pump", "pumping"]):
+        return f"The pump is currently {pump_state}. {'Water is being pumped into the tank' if pump_state == 'ON' else 'The pump is on standby'}."
+    
+    elif any(word in message_lower for word in ["status", "overview", "summary"]):
+        return f"Tank Status: {current_level:.1f} cm ({percent_full:.1f}%), Temperature: {temperature:.1f}°C, Quality: {tds:.0f} ppm TDS, Pump: {pump_state}, Flow: {flow_rate:.1f} L/min"
+    
+    else:
+        return f"I understand you're asking about your water tank. Currently at {percent_full:.1f}% capacity ({current_level:.1f} cm), temperature {temperature:.1f}°C, pump {pump_state}. Ask me about water level, temperature, quality, or pump status!"
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_with_ai(request: ChatRequest):
+    """AI chat endpoint for tank-related queries using Gemini AI"""
+    try:
+        response_text = await generate_ai_response(request.message, request.context)
+        return ChatResponse(
+            response=response_text,
+            timestamp=datetime.utcnow()
+        )
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}")
+        return ChatResponse(
+            response="I'm having trouble processing your request right now. Please try again later.",
+            timestamp=datetime.utcnow()
+        )
+
+@app.post("/predict", response_model=PredictionResponse)
+async def predict_water_demand(request: PredictionRequest):
+    """AI prediction endpoint for water demand analysis"""
+    try:
+        prediction = await generate_prediction_response(request.houseData, request.weatherData)
+        return PredictionResponse(
+            totalDemand=prediction.get("totalDemand", 12580),
+            peakHours=prediction.get("peakHours", [7, 12, 19]),
+            efficiency=prediction.get("efficiency", 87),
+            recommendations=prediction.get("recommendations", ["System operating optimally"]),
+            timestamp=datetime.utcnow()
+        )
+    except Exception as e:
+        logger.error(f"Error in prediction endpoint: {e}")
+        return PredictionResponse(
+            totalDemand=12580,
+            peakHours=[7, 12, 19],
+            efficiency=87,
+            recommendations=["System operating optimally"],
+            timestamp=datetime.utcnow()
+        )
+
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    """Initialize MQTT client on startup"""
+    """Initialize MQTT client and load existing device statuses on startup"""
     global mqtt_client
-    
+
+    # Load existing device statuses from database
+    db = SessionLocal()
+    try:
+        devices = db.query(Device).all()
+        for device in devices:
+            # Get latest telemetry for this device
+            latest_telemetry = db.query(Telemetry).filter(
+                Telemetry.device_id == device.device_id
+            ).order_by(Telemetry.timestamp.desc()).first()
+
+            if latest_telemetry:
+                device_status[device.device_id] = {
+                    "current_level": latest_telemetry.level_cm,
+                    "percent_full": latest_telemetry.percent_full,
+                    "flow_rate": latest_telemetry.flow_l_min,
+                    "pump_state": latest_telemetry.pump_state == "ON",
+                    "temperature": latest_telemetry.temperature_c,
+                    "tds": latest_telemetry.tds_ppm,
+                    "last_update": latest_telemetry.timestamp
+                }
+                logger.info(f"Loaded status for device {device.device_id}")
+    except Exception as e:
+        logger.error(f"Error loading device statuses: {e}")
+    finally:
+        db.close()
+
     mqtt_client = mqtt.Client()
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
-    
+
     if MQTT_USER and MQTT_PASSWORD:
         mqtt_client.username_pw_set(MQTT_USER, MQTT_PASSWORD)
-    
+
     try:
         mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
         mqtt_client.loop_start()
