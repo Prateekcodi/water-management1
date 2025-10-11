@@ -249,6 +249,32 @@ body {
   color: #6b7280;
 }
 
+/* Additional dark mode text overrides for better contrast */
+.dark .text-white {
+  color: #ffffff;
+}
+
+.dark .text-black {
+  color: #000000;
+}
+
+/* Ensure proper contrast for common text elements */
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: #f9fafb;
+}
+
+.dark p {
+  color: #e5e7eb;
+}
+
+.dark .text-primary {
+  color: #60a5fa;
+}
+
+.dark .text-secondary {
+  color: #9ca3af;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -318,6 +344,7 @@ body {
 .dark .btn-secondary {
   color: #f9fafb;
   border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .btn-secondary:hover {
