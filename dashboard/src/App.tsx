@@ -1,17 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Navigation } from './components/Navigation';
 import { TankDashboard } from './components/TankDashboard';
 import { SettingsPage } from './components/SettingsPage';
 import AlertsPage from './components/AlertsPage';
 import AIChat from './components/AIChat';
 import { TownWaterVisualization } from './components/TownWaterVisualization';
-import { api } from './services/api';
+import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
-function App() {
-  const [darkMode, setDarkMode] = useState(false);
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30000, // 30 seconds
+    },
+  },
+});
 
+function App() {
   // Sample town data for visualization
   const [townData] = useState({
     totalWaterStorage: 8750,
@@ -74,36 +84,27 @@ function App() {
     ]
   });
 
-  useEffect(() => {
-    // Set dark mode based on user preference
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    setDarkMode(prefersDark);
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-  };
-
   return (
-    <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-        <Navigation />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<TankDashboard />} />
-            <Route path="/town" element={
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <TownWaterVisualization />
-              </React.Suspense>
-            } />
-            <Route path="/alerts" element={<AlertsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/chat" element={<AIChat />} />
-          </Routes>
-        </main>
-      </div>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+          <Navigation />
+          <main className="container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<TankDashboard />} />
+              <Route path="/town" element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <TownWaterVisualization />
+                </React.Suspense>
+              } />
+              <Route path="/alerts" element={<AlertsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/chat" element={<AIChat />} />
+            </Routes>
+          </main>
+        </div>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
