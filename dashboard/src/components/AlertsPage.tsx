@@ -151,13 +151,13 @@ export default function AlertsPage() {
       {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">System Alerts</h1>
-            <p className="text-gray-600 mt-1">Monitor and manage tank system notifications</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">System Alerts</h1>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">Monitor and manage tank system notifications</p>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
               <Filter className="h-4 w-4" />
-              <span className="text-sm font-medium">Filter</span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">Filter</span>
             </button>
           </div>
         </div>
@@ -184,27 +184,27 @@ export default function AlertsPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Active Alerts</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">{unresolvedAlerts.length}</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Active Alerts</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white mt-2">{unresolvedAlerts.length}</p>
               </div>
               <div className="bg-orange-100 p-3 rounded-lg">
                 <Bell className="h-8 w-8 text-orange-600" />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
               <Clock className="h-4 w-4" />
               <span>Last updated now</span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Resolved</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">{resolvedAlerts.length}</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Resolved</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white mt-2">{resolvedAlerts.length}</p>
               </div>
               <div className="bg-green-100 p-3 rounded-lg">
                 <CheckCircle className="h-8 w-8 text-green-600" />
@@ -215,27 +215,27 @@ export default function AlertsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transform hover:scale-105 transition-transform duration-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-600 text-sm font-medium">Total Alerts</p>
-                <p className="text-4xl font-bold text-gray-900 mt-2">{alerts.length}</p>
+                <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">Total Alerts</p>
+                <p className="text-4xl font-bold text-gray-900 dark:text-white mt-2">{alerts.length}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-lg">
                 <TrendingUp className="h-8 w-8 text-blue-600" />
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">
               Last 24 hours
             </div>
           </div>
         </div>
 
         {/* Filters and Sort */}
-        <div className="bg-white rounded-xl shadow-lg p-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">Filter by:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Filter by:</span>
               {['all', 'LEAK_DETECTED', 'OVERFLOW', 'PUMP_FAULT', 'LOW_LEVEL'].map(type => (
                 <button
                   key={type}
@@ -251,11 +251,11 @@ export default function AlertsPage() {
               ))}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">Sort:</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sort:</span>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="time">Time</option>
                 <option value="priority">Priority</option>
@@ -267,7 +267,7 @@ export default function AlertsPage() {
         {/* Active Alerts */}
         {filteredUnresolved.length > 0 ? (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
               <Bell className="h-5 w-5 text-red-500 animate-pulse" />
               Active Alerts ({filteredUnresolved.length})
             </h2>
@@ -276,7 +276,7 @@ export default function AlertsPage() {
               return (
                 <div
                   key={alert.id}
-                  className={`bg-white rounded-xl shadow-lg border-l-4 ${styles.border} overflow-hidden transform hover:scale-[1.02] transition-all duration-200`}
+                  className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg border-l-4 ${styles.border} overflow-hidden transform hover:scale-[1.02] transition-all duration-200`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className={`${styles.bg} p-6`}>
@@ -287,21 +287,21 @@ export default function AlertsPage() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-900">
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                               {alert.alert_type.replace('_', ' ')}
                             </h3>
                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${styles.badge}`}>
                               {styles.priority}
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                               {formatTimestamp(alert.timestamp)}
                             </span>
                           </div>
-                          <p className="text-gray-700 mb-3">{alert.message}</p>
+                          <p className="text-gray-700 dark:text-gray-300 mb-3">{alert.message}</p>
                           <div className="flex items-center gap-6 text-sm">
                             <div className="flex items-center gap-2">
                               <Droplets className="h-4 w-4 text-blue-500" />
-                              <span className="text-gray-600">
+                              <span className="text-gray-600 dark:text-gray-300">
                                 Level: <span className="font-semibold">{alert.level_cm.toFixed(1)} cm</span>
                               </span>
                             </div>
@@ -312,7 +312,7 @@ export default function AlertsPage() {
                                   style={{ width: `${alert.percent_full}%` }}
                                 ></div>
                               </div>
-                              <span className="font-semibold text-gray-700">{alert.percent_full.toFixed(1)}%</span>
+                              <span className="font-semibold text-gray-700 dark:text-gray-300">{alert.percent_full.toFixed(1)}%</span>
                             </div>
                           </div>
                         </div>
@@ -339,12 +339,12 @@ export default function AlertsPage() {
             })}
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-lg p-12 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full mb-4">
+              <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">All Clear!</h3>
-            <p className="text-gray-600">No active alerts at the moment. All systems operating normally.</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">All Clear!</h3>
+            <p className="text-gray-600 dark:text-gray-300">No active alerts at the moment. All systems operating normally.</p>
           </div>
         )}
 
@@ -366,7 +366,7 @@ export default function AlertsPage() {
             {resolvedAlerts.slice(0, 5).map((alert) => (
               <div
                 key={alert.id}
-                className="bg-white rounded-xl shadow p-6 opacity-75 hover:opacity-100 transition-opacity"
+                className="bg-white dark:bg-gray-800 rounded-xl shadow p-6 opacity-75 hover:opacity-100 transition-opacity"
               >
                 <div className="flex items-start gap-4">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
@@ -378,11 +378,11 @@ export default function AlertsPage() {
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         Resolved
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {formatTimestamp(alert.timestamp)}
                       </span>
                     </div>
-                    <p className="text-gray-600 text-sm">{alert.message}</p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">{alert.message}</p>
                   </div>
                 </div>
               </div>

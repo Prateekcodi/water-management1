@@ -4,6 +4,8 @@ import {
   Sparkles, Zap, MessageSquare, Settings, Moon, Sun,
   Copy, RefreshCw, ThumbsUp, ThumbsDown, Trash2, X, AlertCircle
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 // Type declarations for speech recognition
 declare global {
@@ -38,6 +40,7 @@ export default function AIChat() {
   const recognitionRef = useRef<any>(null);
   const isSpeakingRef = useRef(false);
   const shouldListenRef = useRef(false);
+  const isRecognitionActiveRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -64,6 +67,7 @@ export default function AIChat() {
         console.log('Speech recognition started');
         setIsListening(true);
         setError('');
+        isRecognitionActiveRef.current = true;
       };
 
       recognition.onresult = (event: any) => {
@@ -74,6 +78,7 @@ export default function AIChat() {
         if (transcript && transcript.trim()) {
           setInputMessage(transcript);
           setIsListening(false);
+          isRecognitionActiveRef.current = false;
           
           // Send message after a brief delay
           setTimeout(() => {
@@ -87,6 +92,7 @@ export default function AIChat() {
       recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
         setIsListening(false);
+        isRecognitionActiveRef.current = false;
         
         if (event.error === 'no-speech') {
           setError('No speech detected. Please try again.');
@@ -109,6 +115,7 @@ export default function AIChat() {
       recognition.onend = () => {
         console.log('Speech recognition ended');
         setIsListening(false);
+        isRecognitionActiveRef.current = false;
         
         // Auto-restart if voice mode is active
         if (shouldListenRef.current && !isSpeakingRef.current && !isLoading) {
@@ -142,33 +149,42 @@ export default function AIChat() {
   }, []);
 
   const startListening = () => {
-    if (!recognitionRef.current || isSpeakingRef.current) {
+    if (!recognitionRef.current || isSpeakingRef.current || isRecognitionActiveRef.current) {
       console.log('Cannot start listening:', { 
         hasRecognition: !!recognitionRef.current, 
-        isSpeaking: isSpeakingRef.current 
+        isSpeaking: isSpeakingRef.current,
+        isRecognitionActive: isRecognitionActiveRef.current
       });
       return;
     }
 
     try {
       console.log('Starting speech recognition...');
+      isRecognitionActiveRef.current = true;
       recognitionRef.current.start();
     } catch (error: any) {
       console.error('Error starting recognition:', error);
+      isRecognitionActiveRef.current = false;
 
       // If already started, stop and restart
       if (error.message && error.message.includes('already started')) {
         try {
           recognitionRef.current.stop();
+          isRecognitionActiveRef.current = false;
           setTimeout(() => {
-            try {
-              recognitionRef.current.start();
-            } catch (e) {
-              console.error('Retry failed:', e);
+            if (!isRecognitionActiveRef.current && !isSpeakingRef.current) {
+              try {
+                isRecognitionActiveRef.current = true;
+                recognitionRef.current.start();
+              } catch (e) {
+                console.error('Retry failed:', e);
+                isRecognitionActiveRef.current = false;
+              }
             }
           }, 100);
         } catch (e) {
           console.error('Error restarting:', e);
+          isRecognitionActiveRef.current = false;
         }
       }
     }
@@ -179,8 +195,10 @@ export default function AIChat() {
       try {
         console.log('Stopping speech recognition...');
         recognitionRef.current.stop();
+        isRecognitionActiveRef.current = false;
       } catch (error) {
         console.error('Error stopping recognition:', error);
+        isRecognitionActiveRef.current = false;
       }
     }
     setIsListening(false);
@@ -304,7 +322,15 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      // Call backend API
+      // Get user's home data for context
+      const { data: userData, error: userError } = await supabase
+        .rpc('get_user_home_data', { user_uuid: user?.id });
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+      }
+
+      // Call backend API with Supabase context
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
@@ -314,7 +340,10 @@ export default function AIChat() {
           message: textToSend,
           context: {
             voiceMode: voiceMode,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            userData: userData,
+            userId: user?.id,
+            userRole: user?.role
           }
         })
       });

@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Navigation } from './components/Navigation';
 import { TankDashboard } from './components/TankDashboard';
 import { SettingsPage } from './components/SettingsPage';
 import AlertsPage from './components/AlertsPage';
 import AIChat from './components/AIChat';
 import { TownWaterVisualization } from './components/TownWaterVisualization';
+import LoginPage from './components/auth/LoginPage';
+import RegisterPage from './components/auth/RegisterPage';
+import UserProfile from './components/profile/UserProfile';
+import AdminProfile from './components/profile/AdminProfile';
 import { ThemeProvider } from './contexts/ThemeContext';
 import './App.css';
 
@@ -21,7 +27,10 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+// Main App Content Component
+const AppContent: React.FC = () => {
+  const { user, loading } = useAuth();
+  
   // Sample town data for visualization
   const [townData] = useState({
     totalWaterStorage: 8750,
@@ -84,25 +93,63 @@ function App() {
     ]
   });
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+      <Navigation />
+      <main className="container mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<TankDashboard />} />
+          <Route path="/town" element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <TownWaterVisualization />
+            </React.Suspense>
+          } />
+          <Route path="/alerts" element={<AlertsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/chat" element={<AIChat />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/admin" element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
+
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
-          <Navigation />
-          <main className="container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/" element={<TankDashboard />} />
-              <Route path="/town" element={
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <TownWaterVisualization />
-                </React.Suspense>
-              } />
-              <Route path="/alerts" element={<AlertsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/chat" element={<AIChat />} />
-            </Routes>
-          </main>
-        </div>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
