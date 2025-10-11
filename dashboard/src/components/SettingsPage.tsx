@@ -37,45 +37,45 @@ export const SettingsPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600">Configure your tank monitoring system</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        <p className="text-gray-600 dark:text-gray-300">Configure your tank monitoring system</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Tank Configuration */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
             <Droplets className="h-5 w-5 text-blue-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Tank Configuration</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Tank Configuration</h2>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Tank Height (cm)
               </label>
               <input
                 type="number"
                 value={settings.tankHeight}
                 onChange={(e) => handleInputChange('tankHeight', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Tank Diameter (cm)
               </label>
               <input
                 type="number"
                 value={settings.tankDiameter}
                 onChange={(e) => handleInputChange('tankDiameter', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
-            <div className="bg-blue-50 p-3 rounded-md">
-              <p className="text-sm text-blue-800">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+              <p className="text-sm text-blue-800 dark:text-blue-200">
                 <strong>Calculated Capacity:</strong> {Math.round(Math.PI * Math.pow(settings.tankDiameter / 2, 2) * settings.tankHeight / 1000)} liters
               </p>
             </div>
@@ -83,15 +83,15 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Alert Thresholds */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
             <AlertTriangle className="h-5 w-5 text-red-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Alert Thresholds</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Alert Thresholds</h2>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Leak Detection Threshold (%)
               </label>
               <input
@@ -99,15 +99,15 @@ export const SettingsPage: React.FC = () => {
                 step="0.1"
                 value={settings.leakThreshold}
                 onChange={(e) => handleInputChange('leakThreshold', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Alert when level drops by this percentage without pump running
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Overflow Threshold (%)
               </label>
               <input
@@ -115,9 +115,9 @@ export const SettingsPage: React.FC = () => {
                 step="0.1"
                 value={settings.overflowThreshold}
                 onChange={(e) => handleInputChange('overflowThreshold', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Auto-stop pump when tank reaches this level
               </p>
             </div>
@@ -125,24 +125,24 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* Reading Configuration */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
             <Gauge className="h-5 w-5 text-green-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Reading Configuration</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Reading Configuration</h2>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Reading Interval (seconds)
               </label>
               <input
                 type="number"
                 value={settings.readingInterval}
                 onChange={(e) => handleInputChange('readingInterval', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 How often to read sensors (30-300 seconds recommended)
               </p>
             </div>
@@ -150,44 +150,44 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* MQTT Configuration */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
             <Settings className="h-5 w-5 text-purple-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">MQTT Configuration</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">MQTT Configuration</h2>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 MQTT Broker
               </label>
               <input
                 type="text"
                 value={settings.mqttBroker}
                 onChange={(e) => handleInputChange('mqttBroker', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 MQTT Port
               </label>
               <input
                 type="number"
                 value={settings.mqttPort}
                 onChange={(e) => handleInputChange('mqttPort', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
           <div className="flex items-center mb-4">
             <AlertTriangle className="h-5 w-5 text-yellow-600 mr-2" />
-            <h2 className="text-lg font-semibold text-gray-900">Notifications</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h2>
           </div>
           
           <div className="space-y-4">
@@ -196,9 +196,9 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={settings.notifications}
                 onChange={(e) => handleInputChange('notifications', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               />
-              <label className="ml-2 text-sm text-gray-700">
+              <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 Enable notifications
               </label>
             </div>
@@ -208,9 +208,9 @@ export const SettingsPage: React.FC = () => {
                 type="checkbox"
                 checked={settings.telegramEnabled}
                 onChange={(e) => handleInputChange('telegramEnabled', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               />
-              <label className="ml-2 text-sm text-gray-700">
+              <label className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                 Enable Telegram notifications
               </label>
             </div>
@@ -218,27 +218,27 @@ export const SettingsPage: React.FC = () => {
             {settings.telegramEnabled && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Telegram Bot Token
                   </label>
                   <input
                     type="password"
                     value={settings.telegramToken}
                     onChange={(e) => handleInputChange('telegramToken', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Enter bot token"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Telegram Chat ID
                   </label>
                   <input
                     type="text"
                     value={settings.telegramChatId}
                     onChange={(e) => handleInputChange('telegramChatId', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="Enter chat ID"
                   />
                 </div>

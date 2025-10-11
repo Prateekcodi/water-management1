@@ -243,7 +243,7 @@ export default function AlertsPage() {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                     filter === type
                       ? 'bg-blue-600 text-white shadow-md'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {type === 'all' ? 'All' : type.replace('_', ' ')}
@@ -352,13 +352,13 @@ export default function AlertsPage() {
         {showResolved && resolvedAlerts.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 Resolved Alerts ({resolvedAlerts.length})
               </h2>
               <button
                 onClick={() => setShowResolved(!showResolved)}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               >
                 Hide
               </button>
@@ -372,7 +372,7 @@ export default function AlertsPage() {
                   <CheckCircle className="h-5 w-5 text-green-500 mt-1" />
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-gray-900">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
                         {alert.alert_type.replace('_', ' ')}
                       </h3>
                       <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">

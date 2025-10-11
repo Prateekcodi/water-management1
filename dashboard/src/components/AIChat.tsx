@@ -413,7 +413,7 @@ export default function AIChat() {
               </div>
               
               <div>
-                <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                   <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                     AI Water Assistant
                   </span>
@@ -563,7 +563,7 @@ export default function AIChat() {
                   </div>
                 </div>
                 
-                <h3 className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
                   Welcome! How can I assist you today?
                 </h3>
                 <p className={`mb-8 max-w-md ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
