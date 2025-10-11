@@ -149,7 +149,7 @@ export const api = {
   setPumpState: async (deviceId: string, state: boolean): Promise<void> => {
     try {
       await apiClient.post('/commands', {
-        action: 'PUMP_ON' if state else 'PUMP_OFF',
+        action: state ? 'PUMP_ON' : 'PUMP_OFF',
         device_id: deviceId
       });
     } catch (error) {
