@@ -86,29 +86,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
 
-    if (!error && data.user) {
-      // Create user profile
-      const { error: profileError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email: data.user.email!,
-          full_name: fullName,
-          role: 'user', // Default role
-        })
-
-      if (profileError) {
-        console.error('Error creating user profile:', profileError)
-        return { error: profileError }
+      if (error) {
+        return { error }
       }
-    }
 
-    return { error }
+      if (data.user) {
+        // Create user profile
+        const { error: profileError } = await supabase
+          .from('users')
+          .insert({
+            id: data.user.id,
+            email: data.user.email!,
+            full_name: fullName,
+            role: 'user', // Default role
+          })
+
+        if (profileError) {
+          console.error('Error creating user profile:', profileError)
+          return { error: profileError }
+        }
+      }
+
+      return { error: null }
+    } catch (error) {
+      console.error('Sign up error:', error)
+      return { error: { message: 'Failed to create account. Please try again.' } }
+    }
   }
 
   const signOut = async () => {
