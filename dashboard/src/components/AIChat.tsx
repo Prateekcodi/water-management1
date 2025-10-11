@@ -4,6 +4,8 @@ import {
   Sparkles, Zap, MessageSquare, Settings, Moon, Sun,
   Copy, RefreshCw, ThumbsUp, ThumbsDown, Trash2, X, AlertCircle
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 // Type declarations for speech recognition
 declare global {
@@ -320,7 +322,15 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      // Call backend API
+      // Get user's home data for context
+      const { data: userData, error: userError } = await supabase
+        .rpc('get_user_home_data', { user_uuid: user?.id });
+
+      if (userError) {
+        console.error('Error fetching user data:', userError);
+      }
+
+      // Call backend API with Supabase context
       const response = await fetch('http://localhost:8000/chat', {
         method: 'POST',
         headers: {
@@ -330,7 +340,10 @@ export default function AIChat() {
           message: textToSend,
           context: {
             voiceMode: voiceMode,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            userData: userData,
+            userId: user?.id,
+            userRole: user?.role
           }
         })
       });

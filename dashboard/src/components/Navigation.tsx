@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Home, AlertTriangle, Settings, Activity, Moon, Sun, MessageCircle,
@@ -7,6 +7,7 @@ import {
   BarChart3, Shield, Zap
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useAuth } from '../contexts/AuthContext';
 
 // Enhanced animation variants with fixed TypeScript typing
 const navVariants = {
@@ -107,7 +108,9 @@ const logoVariants = {
 
 export const Navigation: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut, isAdmin } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -128,6 +131,15 @@ export const Navigation: React.FC = () => {
     { path: '/chat', label: 'AI Chat', icon: MessageCircle, color: 'from-purple-400 to-pink-500' },
     { path: '/settings', label: 'Settings', icon: Settings, color: 'from-gray-400 to-gray-600' },
   ];
+
+  const adminNavItems = [
+    { path: '/admin', label: 'Admin Panel', icon: Shield, color: 'from-red-400 to-red-600' },
+  ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const quickStats = [
     { icon: Droplets, value: '85%', label: 'Water Level' },
@@ -357,6 +369,38 @@ export const Navigation: React.FC = () => {
                 )}
               </motion.button>
 
+              {/* Admin Navigation */}
+              {isAdmin && (
+                <motion.div 
+                  variants={itemVariants}
+                  className="hidden lg:flex items-center space-x-2"
+                >
+                  {adminNavItems.map(({ path, label, icon: Icon, color }) => {
+                    const isActive = location.pathname === path;
+                    return (
+                      <Link
+                        key={path}
+                        to={path}
+                        className="relative group"
+                      >
+                        <motion.div
+                          className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all overflow-hidden ${
+                            isActive
+                              ? 'bg-gradient-to-r ' + color + ' text-white shadow-lg'
+                              : 'hover:bg-white/10'
+                          }`}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Icon className="h-5 w-5" />
+                          <span className="font-medium">{label}</span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </motion.div>
+              )}
+
               {/* User Menu */}
               <div className="relative">
                 <motion.button
@@ -380,19 +424,38 @@ export const Navigation: React.FC = () => {
                       className="absolute top-full right-0 mt-2 w-48 rounded-xl glass-heavy shadow-2xl overflow-hidden"
                     >
                       <div className="p-4 border-b border-white/10">
-                        <p className="font-semibold">John Doe</p>
-                        <p className="text-xs text-gray-600 dark:text-gray-400">john@example.com</p>
+                        <p className="font-semibold">{user?.full_name}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400">{user?.email}</p>
+                        <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mt-1 ${
+                          isAdmin ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {user?.role}
+                        </span>
                       </div>
                       <div className="p-2">
-                        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all">
+                        <Link
+                          to="/profile"
+                          className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all"
+                          onClick={() => setShowUserMenu(false)}
+                        >
                           <User className="h-4 w-4" />
                           <span>Profile</span>
-                        </button>
-                        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all">
+                        </Link>
+                        <Link
+                          to="/settings"
+                          className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all"
+                          onClick={() => setShowUserMenu(false)}
+                        >
                           <Settings className="h-4 w-4" />
                           <span>Settings</span>
-                        </button>
-                        <button className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all text-red-500">
+                        </Link>
+                        <button 
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            handleSignOut();
+                          }}
+                          className="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-white/10 transition-all text-red-500"
+                        >
                           <LogOut className="h-4 w-4" />
                           <span>Logout</span>
                         </button>
