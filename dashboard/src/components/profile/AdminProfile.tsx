@@ -97,8 +97,7 @@ const AdminProfile: React.FC = () => {
   }
 
   const handleDeleteUser = async (userId: string) => {
-    // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Are you sure you want to delete this user? This will also delete all their homes and data.')) return
+    if (!window.confirm('Are you sure you want to delete this user? This will also delete all their homes and data.')) return
 
     try {
       const { error } = await supabase
@@ -114,8 +113,7 @@ const AdminProfile: React.FC = () => {
   }
 
   const handleDeleteHome = async (homeId: string) => {
-    // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Are you sure you want to delete this home? This will also delete all associated data.')) return
+    if (!window.confirm('Are you sure you want to delete this home? This will also delete all associated data.')) return
 
     try {
       const { error } = await supabase

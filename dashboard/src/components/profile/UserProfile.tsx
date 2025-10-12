@@ -66,8 +66,7 @@ const UserProfile: React.FC = () => {
   }
 
   const handleDeleteHome = async (homeId: string) => {
-    // eslint-disable-next-line no-restricted-globals
-    if (!confirm('Are you sure you want to delete this home?')) return
+    if (!window.confirm('Are you sure you want to delete this home?')) return
 
     try {
       const { error } = await supabase
