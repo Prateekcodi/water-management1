@@ -391,36 +391,7 @@ Current Smart Tank Status:
     tankData = 'Tank data is currently unavailable. Please check if your device is connected.';
   }
 
-  if (geminiModel) {
-    try {
-      const systemPrompt = `You are a Smart Water Tank AI Assistant. You help users monitor and manage their water tank system.
-
-${tankData}
-
-Instructions:
-- Be helpful, friendly, and knowledgeable about water tank systems
-- Provide specific information based on the current tank data above
-- Give practical advice about water management, maintenance, and efficiency
-- If asked about water level, temperature, quality, pump status, or consumption, use the exact data provided
-- For general questions about water tanks, provide educational and helpful responses
-- Keep responses concise but informative
-- If the data shows concerning levels (below 20%), mention it and suggest action
-- IMPORTANT: Do not use any asterisks (*), double asterisks (**), underscores (_), or any markdown formatting
-- Write in plain text only using normal sentences and paragraphs
-- Use simple bullet points with dashes (-) if needed, but no special formatting
-
-User Question: ${message}
-
-Respond in plain text without any asterisks, bold formatting, or markdown. Just use normal conversational text.`;
-
-      const result = await geminiModel.generateContent(systemPrompt);
-      return cleanMarkdownFormatting(result.response.text());
-    } catch (e) {
-      console.error('Error calling Gemini AI:', e);
-    }
-  }
-
-  // Fallback responses
+  // Use mock AI responses for demo
   const messageLower = message.toLowerCase();
   if (!tankData || tankData.includes('unavailable')) {
     return "I don't have current tank data available. Please check if your device is connected and try again.";
