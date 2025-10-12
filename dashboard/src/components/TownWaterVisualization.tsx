@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import * as THREE from 'three';
 import TownVisualization3D from './3D/TownVisualization3D';
+import LocationBasedHomeSuggestion from './LocationBasedHomeSuggestion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -907,6 +908,7 @@ export function TownWaterVisualization() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingHouse, setEditingHouse] = useState<HouseData | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showLocationSuggestion, setShowLocationSuggestion] = useState(false);
 
   useEffect(() => {
     AIService.predictWaterDemand(houses, weatherData).then(setAiPredictions);
@@ -920,6 +922,20 @@ export function TownWaterVisualization() {
     const newId = `home_${Date.now()}`;
     setHouses(prev => [...prev, { ...homeData, id: newId, aiPrediction: 85, blockchainVerified: false, iotSensors: 10, quantumEfficiency: 90 }]);
     setShowAddForm(false);
+  };
+
+  const handleLocationBasedAdd = (homeData: any) => {
+    // Convert the home data from the location suggestion to our format
+    const newHome: Omit<HouseData, 'id'> = {
+      name: homeData.name || 'New Home',
+      tankLevel: Math.floor(Math.random() * 40) + 60, // Random level between 60-100
+      waterUsage: Math.floor(Math.random() * 20) + 20, // Random usage between 20-40
+      waterQuality: 'good' as const,
+      rainwaterCollected: Math.floor(Math.random() * 100) + 50, // Random collection between 50-150
+      hasLeak: false,
+    };
+    addHome(newHome);
+    setShowLocationSuggestion(false);
   };
 
   const updateHome = (updatedHome: HouseData) => {
