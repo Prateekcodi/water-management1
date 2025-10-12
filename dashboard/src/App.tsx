@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -146,9 +146,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <Router>
-            <AppContent />
-          </Router>
+          <AppContent />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
