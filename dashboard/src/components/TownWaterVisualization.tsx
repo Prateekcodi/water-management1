@@ -1004,6 +1004,15 @@ export function TownWaterVisualization() {
                 <div className="text-lg font-bold text-purple-400">{aiPredictions?.efficiency?.toFixed(0) || 89}%</div>
               </div>
               <button
+                onClick={() => setShowLocationSuggestion(true)}
+                className="px-6 py-3 rounded-xl font-bold transition-all shadow-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+              >
+                <span className="flex items-center">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Add by Location
+                </span>
+              </button>
+              <button
                 onClick={() => setIsEditMode(!isEditMode)}
                 className={`px-6 py-3 rounded-xl font-bold transition-all shadow-2xl ${
                   isEditMode ? 'bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600' : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
@@ -1278,6 +1287,14 @@ export function TownWaterVisualization() {
           animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
       `}</style>
+
+      {/* Location-based Home Suggestion Modal */}
+      {showLocationSuggestion && (
+        <LocationBasedHomeSuggestion
+          onHomeAdded={handleLocationBasedAdd}
+          onClose={() => setShowLocationSuggestion(false)}
+        />
+      )}
     </div>
   );
 }
