@@ -7,6 +7,9 @@ import {
   Cloud, Database, Lock, Eye, Thermometer, Volume2, Camera, Gauge, Wifi, Wrench
 } from 'lucide-react';
 import * as THREE from 'three';
+import TownVisualization3D from './3D/TownVisualization3D';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 const API_BASE_URL = 'http://localhost:8000';
 

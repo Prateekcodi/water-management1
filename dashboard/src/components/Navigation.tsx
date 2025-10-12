@@ -330,18 +330,32 @@ export const Navigation: React.FC = () => {
             >
               {/* Search Button */}
               <motion.button
+                onClick={() => {
+                  const searchTerm = prompt('Enter search term:');
+                  if (searchTerm) {
+                    // Implement search functionality
+                    console.log('Searching for:', searchTerm);
+                    // You can add search logic here
+                  }
+                }}
                 className="hidden md:flex p-3 rounded-xl glass hover:bg-white/10 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                title="Search"
               >
                 <Search className="h-5 w-5" />
               </motion.button>
 
               {/* Notifications */}
               <motion.button
+                onClick={() => {
+                  // Navigate to alerts page
+                  navigate('/alerts');
+                }}
                 className="relative p-3 rounded-xl glass hover:bg-white/10 transition-all"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                title="View Notifications"
               >
                 <Bell className="h-5 w-5" />
                 {notifications > 0 && (

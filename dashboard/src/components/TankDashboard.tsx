@@ -26,6 +26,9 @@ import { api } from '../services/api.ts';
 import { StatusCard } from './StatusCard.tsx';
 import { LoadingSpinner } from './LoadingSpinner.tsx';
 import { TankVisualization } from './TankVisualization.tsx';
+import WaterTank3D from './3D/WaterTank3D';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 interface TankStatus {
   device_id: string;
@@ -81,6 +84,14 @@ const AnimatedNumber: React.FC<{ value: number; decimals?: number; suffix?: stri
 };
 
 export const TankDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [realTimeData, setRealTimeData] = useState({
+    waterLevel: 75,
+    temperature: 22.5,
+    phLevel: 7.2,
+    turbidity: 1.8,
+    isLeaking: false
+  });
 
   const { data: status, isLoading: statusLoading, error: statusError, refetch } = useQuery<TankStatus>(
     'tank-status',
@@ -93,6 +104,67 @@ export const TankDashboard: React.FC = () => {
     () => api.getTelemetry('tank01', 24),
     { refetchInterval: 10000 }
   );
+
+  // Real-time data fetching from Supabase
+  useEffect(() => {
+    const fetchRealTimeData = async () => {
+      if (!user) return;
+
+      try {
+        // Get user's home data
+        const { data: homes, error: homesError } = await supabase
+          .from('homes')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (homesError) {
+          console.error('Error fetching home data:', homesError);
+          return;
+        }
+
+        // Get latest sensor data
+        const { data: sensorData, error: sensorError } = await supabase
+          .from('sensor_data')
+          .select('*')
+          .eq('home_id', homes.id)
+          .order('timestamp', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (sensorData) {
+          setRealTimeData({
+            waterLevel: sensorData.water_level,
+            temperature: sensorData.temperature,
+            phLevel: sensorData.ph_level,
+            turbidity: sensorData.turbidity,
+            isLeaking: false // This would be determined by alert logic
+          });
+        }
+
+        // Check for active alerts
+        const { data: alerts, error: alertsError } = await supabase
+          .from('alerts')
+          .select('*')
+          .eq('home_id', homes.id)
+          .eq('resolved', false)
+          .eq('alert_type', 'LEAK_DETECTED')
+          .limit(1);
+
+        if (alerts && alerts.length > 0) {
+          setRealTimeData(prev => ({ ...prev, isLeaking: true }));
+        }
+
+      } catch (error) {
+        console.error('Error fetching real-time data:', error);
+      }
+    };
+
+    fetchRealTimeData();
+    const interval = setInterval(fetchRealTimeData, 5000); // Update every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Get predictions data from API
   const { data: predictions, isLoading: predictionsLoading } = useQuery(
@@ -257,6 +329,24 @@ export const TankDashboard: React.FC = () => {
           icon={<Clock className="h-6 w-6" />}
           color={status?.days_until_empty && status.days_until_empty < 2 ? "red" : "blue"}
         />
+      </div>
+
+      {/* 3D Water Tank Visualization */}
+      <div className="mt-8">
+        <h3 className="text-2xl font-bold mb-6 flex items-center text-gray-900 dark:text-white">
+          <Droplets className="h-7 w-7 text-blue-500 mr-3" />
+          3D Tank Visualization
+        </h3>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
+          <WaterTank3D
+            waterLevel={realTimeData.waterLevel}
+            temperature={realTimeData.temperature}
+            phLevel={realTimeData.phLevel}
+            turbidity={realTimeData.turbidity}
+            isLeaking={realTimeData.isLeaking}
+            className="w-full h-96"
+          />
+        </div>
       </div>
       
       {/* Water Quality Sensors */}
