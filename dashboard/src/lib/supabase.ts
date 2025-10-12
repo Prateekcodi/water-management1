@@ -23,6 +23,15 @@ export interface Home {
   town_id: string
   created_at: string
   updated_at: string
+  users?: {
+    full_name: string
+    email: string
+  }
+  towns?: {
+    name: string
+    state: string
+    country: string
+  }
 }
 
 export interface Town {
@@ -44,6 +53,12 @@ export interface Alert {
   resolved: boolean
   created_at: string
   updated_at: string
+  homes?: {
+    name: string
+    users: {
+      full_name: string
+    }
+  }
 }
 
 export interface SensorData {

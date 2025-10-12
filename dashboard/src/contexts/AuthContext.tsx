@@ -29,30 +29,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) {
-        fetchUserProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session)
-      if (session?.user) {
-        await fetchUserProfile(session.user.id)
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
-    })
-
-    return () => subscription.unsubscribe()
+    // Start with no user - require login
+    setUser(null)
+    setLoading(false)
   }, [])
 
   const fetchUserProfile = async (userId: string) => {
@@ -78,50 +57,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { error }
-  }
-
-  const signUp = async (email: string, password: string, fullName: string) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (error) {
-        return { error }
+    // Mock authentication
+    if (email === 'admin@smartaqua.com' && password === 'admin123') {
+      const mockUser: User = {
+        id: 'admin-user-1',
+        email: 'admin@smartaqua.com',
+        full_name: 'Admin User',
+        role: 'admin',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
-
-      if (data.user) {
-        // Create user profile
-        const { error: profileError } = await supabase
-          .from('users')
-          .insert({
-            id: data.user.id,
-            email: data.user.email!,
-            full_name: fullName,
-            role: 'user', // Default role
-          })
-
-        if (profileError) {
-          console.error('Error creating user profile:', profileError)
-          return { error: profileError }
-        }
-      }
-
+      setUser(mockUser)
       return { error: null }
-    } catch (error) {
-      console.error('Sign up error:', error)
-      return { error: { message: 'Failed to create account. Please try again.' } }
+    } else if (email === 'user@smartaqua.com' && password === 'user123') {
+      const mockUser: User = {
+        id: 'regular-user-1',
+        email: 'user@smartaqua.com',
+        full_name: 'Regular User',
+        role: 'user',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+      setUser(mockUser)
+      return { error: null }
+    } else {
+      return { error: { message: 'Invalid email or password' } }
     }
   }
 
+  const signUp = async (email: string, password: string, fullName: string) => {
+    // Mock sign up - create a new user
+    const mockUser: User = {
+      id: `user-${Date.now()}`,
+      email: email,
+      full_name: fullName,
+      role: 'user',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    setUser(mockUser)
+    return { error: null }
+  }
+
   const signOut = async () => {
-    await supabase.auth.signOut()
+    setUser(null)
+    setSession(null)
   }
 
   const isAdmin = user?.role === 'admin'
