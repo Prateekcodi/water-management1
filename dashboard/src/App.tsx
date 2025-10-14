@@ -8,7 +8,7 @@ import { TankDashboard } from './components/TankDashboard';
 import { SettingsPage } from './components/SettingsPage';
 import AlertsPage from './components/AlertsPage';
 import AIChat from './components/AIChat';
-import { TownWaterVisualization } from './components/TownWaterVisualization';
+import TownWaterVisualization from './components/TownWaterVisualization';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
 import UserProfile from './components/profile/UserProfile';
